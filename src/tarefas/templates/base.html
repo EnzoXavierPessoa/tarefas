@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo }}</title>
+    <!-- Framework CSS (Bootstrap) para design visual da internet -->
+<link href="stylesheet" href="style.css">
+</head>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .task-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            background-color: #f1f3f5;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6 task-card">
+                <h2 class="text-center mb-4 text-primary">Gerenciador de Tarefas</h2>
+                
+                <div class="mb-3">
+                    <label for="tituloTarefa" class="form-label font-weight-bold">Descrição da Tarefa</label>
+                    <input type="text" id="tituloTarefa" class="form-control" placeholder="Digite a tarefa...">
+                </div>
+
+                <div class="mb-3">
+                    <label for="dataConclusao" class="form-label font-weight-bold">Data de Conclusão (Opcional)</label>
+                    <input type="date" id="dataConclusao" class="form-control">
+                </div>
+
+                <button type="button" onclick="adicionarTarefa()" class="btn btn-primary w-100 mb-4">Adicionar Tarefa</button>
+
+                <hr>
+
+                <h4 class="mb-3">Suas Tarefas</h4>
+                <div id="listaTarefas">
+                    <p class="text-muted text-center">Nenhuma tarefa cadastrada.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tarefas;
+        const tarefasSalvas = JSON.parse(localStorage.getItem('tarefas'));  
+
+        if (Array.isArray(tarefasSalvas)) {
+            tarefas = tarefasSalvas;
+        } else {
+            tarefas = [];
+        }
+
+        function salvarTarefas() {
+            localStorage.setItem('tarefas', JSON.stringify(tarefas));
+        }
+
+        function renderizarTarefas() {
+            const listaTarefas = document.getElementById('listaTarefas');
+            listaTarefas.innerHTML = "";
+
+            if (tarefas.length === 0) {
+                listaTarefas.innerHTML = '<p class="text-muted text-center">Nenhuma tarefa cadastrada.</p>';
+                return;
+            }
+
+            tarefas.forEach(function (tarefa) {
+                const divTarefa = document.createElement('div');
+                divTarefa.className = 'task-item';
+                
+                const textoDiv = document.createElement('span');
+                textoDiv.innerHTML = `<strong>${tarefa.tituloTarefa}</strong>` + (tarefa.dataConclusao ? ` <small class="text-muted">(${tarefa.dataConclusao})</small>` : '');
+                
+                const botaoApagar = document.createElement('button');
+                botaoApagar.className = "btn btn-danger btn-sm";
+                botaoApagar.innerHTML = "Apagar";
+                botaoApagar.onclick = apagarTarefa;
+                botaoApagar.id = tarefa.idTarefa;
+
+                divTarefa.appendChild(textoDiv);
+                divTarefa.appendChild(botaoApagar);
+                listaTarefas.appendChild(divTarefa);
+            });
+        }
+
+        function adicionarTarefa() {
+            const inputTitulo = document.getElementById('tituloTarefa');
+            const inputData = document.getElementById('dataConclusao');
+
+            if (!inputTitulo.value.trim()) {
+                alert("Por favor, insira o título da tarefa.");
+                return;
+            }
+
+            tarefas.push({
+                tituloTarefa: inputTitulo.value,
+                dataConclusao: inputData.value,
+                idTarefa: Date.now()
+            });
+
+            inputTitulo.value = "";
+            inputData.value = "";
+
+            salvarTarefas();
+            renderizarTarefas();
+        }
+
+        function apagarTarefa(evento) {
+            const idTarefa = evento.target.id;
+
+            tarefas = tarefas.filter(function (tarefa) {
+                return tarefa.idTarefa != idTarefa;
+            });
+
+            salvarTarefas();
+            renderizarTarefas();
+        }
+
+        renderizarTarefas();
+    </script>
+</body>
+</html>
