@@ -1,11 +1,17 @@
+from models.database import init_db
 
-from pathlib import Path
-from flask import Flask
+from flask import Flask, render_template 
 
-BASE_DIR = Path(__file__).resolve().parent
+app = Flask(__name__)
 
-app = Flask(
-    __name__,
-    template_folder=str(BASE_DIR / "templates"),
-    static_folder=str(BASE_DIR / "static")
-)
+with app.app_context():
+    init_db('data/tarefas.sql')
+
+@app.route('/test')
+def test():
+    return 'Servidor online!'
+
+@app.route('/')
+def home():
+    return render_template('base.html', titulo='Minha lista')
+
